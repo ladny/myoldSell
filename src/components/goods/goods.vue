@@ -30,18 +30,25 @@
 									<span class="now">${{food.price}}</span>
 									<span class="old" v-show="food.oldPrice">${{food.oldPrice}}</span>
 								</div>
+                <div class="cartcontrol-wrapper">
+                  <cartcontrol @add="addFood" :food="food"></cartcontrol>
+                </div>
 							</div>
 						</li>
 					</ul>
 				</li>
 			</ul>
 		</div>
+    <shopcart ref="shopcart" :selectFoods="selectFoods" :deliveryPrice="seller.deliveryPrice" :minPrice="seller.minPrice"></shopcart>
 	</div>
 </div>
 </template>
 
 <script>
 import BScroll from 'better-scroll';
+import shopcart from '../../components/shopcart/shopcart';
+import cartcontrol from '../../components/cartcontrol/cartcontrol'
+
 
 const ERR_OK = 0;
 export default {
@@ -58,7 +65,10 @@ export default {
       scrollY: 0
 		};
 	},
-
+   components: {
+      shopcart,
+      cartcontrol
+   },
   computed: {
     // 左侧当前索引
     currentIndex() {
@@ -70,6 +80,18 @@ export default {
         }  
       }
       return 0;
+    },
+    //子组件选择food 选中food，goods就发生变化 从新计算
+    selectFoods() {
+      let foods=[];
+      this.goods.forEach((good) => {
+        good.foods.forEach((food) => {
+          if(food.count){
+            foods.push(food);
+          }
+        });
+      });
+      return foods;
     }
   },
 
@@ -129,6 +151,17 @@ export default {
         height+=item.clientHeight;
         this.listHeight.push(height);
       }
+    },
+    //父组件 拿到子组件的方法
+    addFood(target){
+      this._drop(target);
+    },
+    //下落方法 访问子组件
+    _drop(target){
+      // 异步执行下落动画体验优化
+      this.$nextTick(() => {
+         this.$refs.shopcart.drop(target);
+      });
     }
 
   }
